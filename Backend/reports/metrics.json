@@ -1,80 +1,70 @@
 {
-  "dataset_source": "cache",
-  "model": "GaussianNB",
-  "test_size": 0.2,
-  "random_state": 42,
-  "features_count": 30,
+  "id": "selectkbest_10_features",
+  "name": "Selecao estatistica - 10 features",
+  "description": "GaussianNB usando as 10 features com maior score ANOVA no conjunto de treino.",
+  "algorithm": "Gaussian Naive Bayes",
+  "keeps_pdf_requirement": true,
+  "features_count": 10,
   "features": [
-    "radius1",
-    "texture1",
-    "perimeter1",
-    "area1",
-    "smoothness1",
-    "compactness1",
-    "concavity1",
-    "concave_points1",
-    "symmetry1",
-    "fractal_dimension1",
-    "radius2",
-    "texture2",
-    "perimeter2",
-    "area2",
-    "smoothness2",
-    "compactness2",
-    "concavity2",
-    "concave_points2",
-    "symmetry2",
-    "fractal_dimension2",
-    "radius3",
-    "texture3",
-    "perimeter3",
-    "area3",
-    "smoothness3",
-    "compactness3",
-    "concavity3",
     "concave_points3",
-    "symmetry3",
-    "fractal_dimension3"
+    "perimeter3",
+    "radius3",
+    "concave_points1",
+    "perimeter1",
+    "area3",
+    "radius1",
+    "area1",
+    "concavity1",
+    "concavity3"
   ],
-  "accuracy": 0.9210526315789473,
-  "precision_macro": 0.9215384615384616,
-  "recall_macro": 0.9077380952380952,
-  "f1_macro": 0.9138321995464853,
+  "accuracy": 0.9385964912280702,
+  "precision_macro": 0.941025641025641,
+  "recall_macro": 0.9265873015873016,
+  "f1_macro": 0.9329805996472662,
+  "recall_malignant": 0.8809523809523809,
+  "precision_malignant": 0.9487179487179487,
+  "brier_malignant": 0.05422812069557071,
+  "log_loss": 0.2396576321958104,
+  "mean_error_confidence": 0.9127950064806031,
+  "max_error_confidence": 0.994053208550229,
+  "cv_accuracy_mean": 0.9401645707188324,
+  "cv_f1_macro_mean": 0.936120341780556,
+  "cv_recall_macro_mean": 0.9359906207269457,
   "classification_report": {
     "Tumor Benigno": {
-      "precision": 0.92,
-      "recall": 0.9583333333333334,
-      "f1-score": 0.9387755102040817,
+      "precision": 0.9333333333333333,
+      "recall": 0.9722222222222222,
+      "f1-score": 0.9523809523809523,
       "support": 72.0
     },
     "Tumor Maligno": {
-      "precision": 0.9230769230769231,
-      "recall": 0.8571428571428571,
-      "f1-score": 0.8888888888888888,
+      "precision": 0.9487179487179487,
+      "recall": 0.8809523809523809,
+      "f1-score": 0.9135802469135802,
       "support": 42.0
     },
-    "accuracy": 0.9210526315789473,
+    "accuracy": 0.9385964912280702,
     "macro avg": {
-      "precision": 0.9215384615384616,
-      "recall": 0.9077380952380952,
-      "f1-score": 0.9138321995464853,
+      "precision": 0.941025641025641,
+      "recall": 0.9265873015873016,
+      "f1-score": 0.9329805996472662,
       "support": 114.0
     },
     "weighted avg": {
-      "precision": 0.9211336032388665,
-      "recall": 0.9210526315789473,
-      "f1-score": 0.9203962286669054,
+      "precision": 0.9390013495276655,
+      "recall": 0.9385964912280702,
+      "f1-score": 0.9380859556298152,
       "support": 114.0
     }
   },
   "confusion_matrix": {
     "previsto_Tumor Benigno": {
-      "real_Tumor Benigno": 69,
-      "real_Tumor Maligno": 6
+      "real_Tumor Benigno": 70,
+      "real_Tumor Maligno": 5
     },
     "previsto_Tumor Maligno": {
-      "real_Tumor Benigno": 3,
-      "real_Tumor Maligno": 36
+      "real_Tumor Benigno": 2,
+      "real_Tumor Maligno": 37
     }
   }
 }

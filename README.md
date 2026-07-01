@@ -38,6 +38,20 @@ python -m pytest
 python -m app.api
 ```
 
+O comando `python -m src.train_model` agora executa um pipeline experimental mantendo
+rigorosamente Naive Bayes:
+
+- baseline com 30 features;
+- selecao estatistica com 10 features;
+- selecao evitando features com correlacao absoluta acima de 0.90;
+- versao calibrada com baixa correlacao.
+
+O relato da descoberta cientifica fica em:
+
+```text
+Backend/reports/descoberta_cientifica.md
+```
+
 Endpoints:
 
 - `GET /health`
@@ -75,6 +89,7 @@ Funcionalidades atuais:
 - explicacao textual automatica da predicao;
 - painel de desempenho com metricas, baseline e matriz de confusao;
 - distribuicao das classes da base.
+- seletor de abordagem Naive Bayes para comparar os experimentos.
 
 Comandos:
 
@@ -123,10 +138,11 @@ O pre-processamento aplicado no treinamento e:
 
 Ultima execucao validada:
 
-- Acuracia: `0.9211`
-- Precisao macro: `0.9215`
-- Recall macro: `0.9077`
-- F1 macro: `0.9138`
+- Abordagem recomendada: `Selecao estatistica - 10 features`
+- Acuracia: `0.9386`
+- Precisao macro: `0.9410`
+- Recall macro: `0.9266`
+- F1 macro: `0.9330`
 
 ## Validacoes
 

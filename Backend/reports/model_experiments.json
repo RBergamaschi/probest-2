@@ -1,0 +1,306 @@
+[
+  {
+    "id": "baseline_30_features",
+    "name": "Baseline - 30 features",
+    "description": "Primeiro experimento: GaussianNB com todas as 30 features do WDBC.",
+    "algorithm": "Gaussian Naive Bayes",
+    "keeps_pdf_requirement": true,
+    "features_count": 30,
+    "features": [
+      "radius1",
+      "texture1",
+      "perimeter1",
+      "area1",
+      "smoothness1",
+      "compactness1",
+      "concavity1",
+      "concave_points1",
+      "symmetry1",
+      "fractal_dimension1",
+      "radius2",
+      "texture2",
+      "perimeter2",
+      "area2",
+      "smoothness2",
+      "compactness2",
+      "concavity2",
+      "concave_points2",
+      "symmetry2",
+      "fractal_dimension2",
+      "radius3",
+      "texture3",
+      "perimeter3",
+      "area3",
+      "smoothness3",
+      "compactness3",
+      "concavity3",
+      "concave_points3",
+      "symmetry3",
+      "fractal_dimension3"
+    ],
+    "accuracy": 0.9210526315789473,
+    "precision_macro": 0.9215384615384616,
+    "recall_macro": 0.9077380952380952,
+    "f1_macro": 0.9138321995464853,
+    "recall_malignant": 0.8571428571428571,
+    "precision_malignant": 0.9230769230769231,
+    "brier_malignant": 0.07566584759036664,
+    "log_loss": 0.4998627007973688,
+    "mean_error_confidence": 0.9782358480868868,
+    "max_error_confidence": 0.9999897203952659,
+    "cv_accuracy_mean": 0.9296382549293588,
+    "cv_f1_macro_mean": 0.92434215931563,
+    "cv_recall_macro_mean": 0.9218547720431113,
+    "classification_report": {
+      "Tumor Benigno": {
+        "precision": 0.92,
+        "recall": 0.9583333333333334,
+        "f1-score": 0.9387755102040817,
+        "support": 72.0
+      },
+      "Tumor Maligno": {
+        "precision": 0.9230769230769231,
+        "recall": 0.8571428571428571,
+        "f1-score": 0.8888888888888888,
+        "support": 42.0
+      },
+      "accuracy": 0.9210526315789473,
+      "macro avg": {
+        "precision": 0.9215384615384616,
+        "recall": 0.9077380952380952,
+        "f1-score": 0.9138321995464853,
+        "support": 114.0
+      },
+      "weighted avg": {
+        "precision": 0.9211336032388665,
+        "recall": 0.9210526315789473,
+        "f1-score": 0.9203962286669054,
+        "support": 114.0
+      }
+    },
+    "confusion_matrix": {
+      "previsto_Tumor Benigno": {
+        "real_Tumor Benigno": 69,
+        "real_Tumor Maligno": 6
+      },
+      "previsto_Tumor Maligno": {
+        "real_Tumor Benigno": 3,
+        "real_Tumor Maligno": 36
+      }
+    }
+  },
+  {
+    "id": "selectkbest_10_features",
+    "name": "Selecao estatistica - 10 features",
+    "description": "GaussianNB usando as 10 features com maior score ANOVA no conjunto de treino.",
+    "algorithm": "Gaussian Naive Bayes",
+    "keeps_pdf_requirement": true,
+    "features_count": 10,
+    "features": [
+      "concave_points3",
+      "perimeter3",
+      "radius3",
+      "concave_points1",
+      "perimeter1",
+      "area3",
+      "radius1",
+      "area1",
+      "concavity1",
+      "concavity3"
+    ],
+    "accuracy": 0.9385964912280702,
+    "precision_macro": 0.941025641025641,
+    "recall_macro": 0.9265873015873016,
+    "f1_macro": 0.9329805996472662,
+    "recall_malignant": 0.8809523809523809,
+    "precision_malignant": 0.9487179487179487,
+    "brier_malignant": 0.05422812069557071,
+    "log_loss": 0.2396576321958104,
+    "mean_error_confidence": 0.9127950064806031,
+    "max_error_confidence": 0.994053208550229,
+    "cv_accuracy_mean": 0.9401645707188324,
+    "cv_f1_macro_mean": 0.936120341780556,
+    "cv_recall_macro_mean": 0.9359906207269457,
+    "classification_report": {
+      "Tumor Benigno": {
+        "precision": 0.9333333333333333,
+        "recall": 0.9722222222222222,
+        "f1-score": 0.9523809523809523,
+        "support": 72.0
+      },
+      "Tumor Maligno": {
+        "precision": 0.9487179487179487,
+        "recall": 0.8809523809523809,
+        "f1-score": 0.9135802469135802,
+        "support": 42.0
+      },
+      "accuracy": 0.9385964912280702,
+      "macro avg": {
+        "precision": 0.941025641025641,
+        "recall": 0.9265873015873016,
+        "f1-score": 0.9329805996472662,
+        "support": 114.0
+      },
+      "weighted avg": {
+        "precision": 0.9390013495276655,
+        "recall": 0.9385964912280702,
+        "f1-score": 0.9380859556298152,
+        "support": 114.0
+      }
+    },
+    "confusion_matrix": {
+      "previsto_Tumor Benigno": {
+        "real_Tumor Benigno": 70,
+        "real_Tumor Maligno": 5
+      },
+      "previsto_Tumor Maligno": {
+        "real_Tumor Benigno": 2,
+        "real_Tumor Maligno": 37
+      }
+    }
+  },
+  {
+    "id": "low_corr_12_features",
+    "name": "Baixa correlacao - 12 features",
+    "description": "GaussianNB com features ranqueadas por ANOVA, mas evitando pares com correlacao absoluta acima de 0.90.",
+    "algorithm": "Gaussian Naive Bayes",
+    "keeps_pdf_requirement": true,
+    "features_count": 12,
+    "features": [
+      "concave_points3",
+      "perimeter3",
+      "concavity1",
+      "concavity3",
+      "compactness1",
+      "compactness3",
+      "radius2",
+      "texture3",
+      "smoothness3",
+      "symmetry3",
+      "concave_points2",
+      "smoothness1"
+    ],
+    "accuracy": 0.8947368421052632,
+    "precision_macro": 0.8902027027027026,
+    "recall_macro": 0.8819444444444444,
+    "f1_macro": 0.885733377881724,
+    "recall_malignant": 0.8333333333333334,
+    "precision_malignant": 0.875,
+    "brier_malignant": 0.09524128712688007,
+    "log_loss": 0.4646074036721195,
+    "mean_error_confidence": 0.9375993852443495,
+    "max_error_confidence": 0.9999740296734961,
+    "cv_accuracy_mean": 0.9173730787144854,
+    "cv_f1_macro_mean": 0.9117929598398931,
+    "cv_recall_macro_mean": 0.9110231154368069,
+    "classification_report": {
+      "Tumor Benigno": {
+        "precision": 0.9054054054054054,
+        "recall": 0.9305555555555556,
+        "f1-score": 0.9178082191780822,
+        "support": 72.0
+      },
+      "Tumor Maligno": {
+        "precision": 0.875,
+        "recall": 0.8333333333333334,
+        "f1-score": 0.8536585365853658,
+        "support": 42.0
+      },
+      "accuracy": 0.8947368421052632,
+      "macro avg": {
+        "precision": 0.8902027027027026,
+        "recall": 0.8819444444444444,
+        "f1-score": 0.885733377881724,
+        "support": 114.0
+      },
+      "weighted avg": {
+        "precision": 0.894203413940256,
+        "recall": 0.8947368421052632,
+        "f1-score": 0.8941741255912918,
+        "support": 114.0
+      }
+    },
+    "confusion_matrix": {
+      "previsto_Tumor Benigno": {
+        "real_Tumor Benigno": 67,
+        "real_Tumor Maligno": 7
+      },
+      "previsto_Tumor Maligno": {
+        "real_Tumor Benigno": 5,
+        "real_Tumor Maligno": 35
+      }
+    }
+  },
+  {
+    "id": "calibrado_low_corr_12_features",
+    "name": "Calibrado + baixa correlacao",
+    "description": "GaussianNB com as features de menor redundancia e calibracao sigmoid para probabilidades menos extremas.",
+    "algorithm": "Gaussian Naive Bayes",
+    "keeps_pdf_requirement": true,
+    "features_count": 12,
+    "features": [
+      "concave_points3",
+      "perimeter3",
+      "concavity1",
+      "concavity3",
+      "compactness1",
+      "compactness3",
+      "radius2",
+      "texture3",
+      "smoothness3",
+      "symmetry3",
+      "concave_points2",
+      "smoothness1"
+    ],
+    "accuracy": 0.8859649122807017,
+    "precision_macro": 0.8825641025641026,
+    "recall_macro": 0.8700396825396826,
+    "f1_macro": 0.8755353993449231,
+    "recall_malignant": 0.8095238095238095,
+    "precision_malignant": 0.8717948717948718,
+    "brier_malignant": 0.09043850473239749,
+    "log_loss": 0.3173807926887241,
+    "mean_error_confidence": 0.8509724345974725,
+    "max_error_confidence": 0.9338502686002436,
+    "cv_accuracy_mean": 0.9173730787144854,
+    "cv_f1_macro_mean": 0.9117929598398931,
+    "cv_recall_macro_mean": 0.9110231154368069,
+    "classification_report": {
+      "Tumor Benigno": {
+        "precision": 0.8933333333333333,
+        "recall": 0.9305555555555556,
+        "f1-score": 0.9115646258503401,
+        "support": 72.0
+      },
+      "Tumor Maligno": {
+        "precision": 0.8717948717948718,
+        "recall": 0.8095238095238095,
+        "f1-score": 0.8395061728395061,
+        "support": 42.0
+      },
+      "accuracy": 0.8859649122807017,
+      "macro avg": {
+        "precision": 0.8825641025641026,
+        "recall": 0.8700396825396826,
+        "f1-score": 0.8755353993449231,
+        "support": 114.0
+      },
+      "weighted avg": {
+        "precision": 0.8853981106612685,
+        "recall": 0.8859649122807017,
+        "f1-score": 0.8850167747410855,
+        "support": 114.0
+      }
+    },
+    "confusion_matrix": {
+      "previsto_Tumor Benigno": {
+        "real_Tumor Benigno": 67,
+        "real_Tumor Maligno": 8
+      },
+      "previsto_Tumor Maligno": {
+        "real_Tumor Benigno": 5,
+        "real_Tumor Maligno": 34
+      }
+    }
+  }
+]

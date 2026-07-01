@@ -30,7 +30,10 @@ def test_model_info(client):
     response = client.get("/model-info")
     payload = response.get_json()
     assert response.status_code == 200
-    assert len(payload["features"]) == 30
+    assert len(payload["all_features"]) == 30
+    assert len(payload["features"]) >= 1
+    assert payload["default_approach_id"]
+    assert len(payload["approaches"]) >= 4
     assert payload["classes"]["B"] == "Tumor Benigno"
     assert payload["classes"]["M"] == "Tumor Maligno"
 
@@ -43,6 +46,8 @@ def test_predict_valid_payload(client):
     assert response.status_code == 200
     assert payload["class"] in {"B", "M"}
     assert payload["prediction"] in {"Tumor Benigno", "Tumor Maligno"}
+    assert payload["approach_id"]
+    assert payload["features_count"] >= 1
     assert "probabilities" in payload
     assert "confidence" in payload
     assert "confidence_level" in payload
@@ -64,6 +69,19 @@ def test_predict_threshold(client):
     payload = response.get_json()
     assert response.status_code == 200
     assert payload["threshold"] == 0.8
+
+
+def test_predict_specific_approach(client):
+    bundle = load_dataset(cache=True)
+    sample = bundle.features.iloc[0].to_dict()
+    response = client.post(
+        "/predict",
+        json={"features": sample, "threshold": 0.5, "approach_id": "baseline_30_features"},
+    )
+    payload = response.get_json()
+    assert response.status_code == 200
+    assert payload["approach_id"] == "baseline_30_features"
+    assert payload["features_count"] == 30
 
 
 def test_examples(client):
@@ -93,3 +111,5 @@ def test_model_summary(client):
     assert payload["dataset"]["features"] == 30
     assert payload["majority_baseline_accuracy"] > 0
     assert "metrics" in payload
+    assert len(payload["experiments"]) >= 4
+    assert payload["default_approach_id"]

@@ -5,12 +5,36 @@ export const API_BASE_URL = RAW_BASE.replace(/\/$/, "");
 
 export interface ModelInfo {
   features: string[];
+  all_features?: string[];
   classes?: Record<string, string>;
   model?: string;
   target?: string;
+  default_approach_id?: string;
+  approaches?: ModelApproach[];
   input_format?: {
     features?: Record<string, "number" | string>;
   };
+  [key: string]: unknown;
+}
+
+export interface ModelApproach {
+  id: string;
+  name: string;
+  description: string;
+  features: string[];
+  features_count: number;
+  metrics: ApproachMetrics;
+}
+
+export interface ApproachMetrics {
+  accuracy?: number;
+  precision_macro?: number;
+  recall_macro?: number;
+  f1_macro?: number;
+  recall_malignant?: number;
+  precision_malignant?: number;
+  brier_malignant?: number;
+  mean_error_confidence?: number;
   [key: string]: unknown;
 }
 
@@ -26,6 +50,10 @@ export interface PredictResponse {
   probabilities?: Record<string, number>;
   raw_probabilities?: Record<string, number>;
   top_features?: FeatureExplanation[];
+  approach_id?: string;
+  approach_name?: string;
+  features_used?: string[];
+  features_count?: number;
   [key: string]: unknown;
 }
 
@@ -92,6 +120,17 @@ export interface ModelSummary {
     classification_report?: Record<string, Record<string, number> | number>;
     [key: string]: unknown;
   };
+  experiments?: Array<
+    ApproachMetrics & {
+      id: string;
+      name: string;
+      description: string;
+      features_count: number;
+      features: string[];
+    }
+  >;
+  approaches?: ModelApproach[];
+  default_approach_id?: string;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -117,15 +156,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const getModelInfo = () => request<ModelInfo>("/model-info");
 
-export const postPredict = (features: Record<string, number>, threshold = 0.5) =>
+export const postPredict = (
+  features: Record<string, number>,
+  threshold = 0.5,
+  approachId?: string,
+) =>
   request<PredictResponse>("/predict", {
     method: "POST",
-    body: JSON.stringify({ features, threshold }),
+    body: JSON.stringify({ features, threshold, approach_id: approachId }),
   });
 
 export const getHealth = () => request<{ status: string }>("/health");
 
-export const getExamples = () => request<ExamplesResponse>("/examples");
+export const getExamples = (approachId?: string) =>
+  request<ExamplesResponse>(`/examples${approachId ? `?approach_id=${approachId}` : ""}`);
 
 export const getFeatureStats = () => request<FeatureStatsResponse>("/feature-stats");
 

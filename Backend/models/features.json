@@ -1,5 +1,17 @@
 {
   "features": [
+    "concave_points3",
+    "perimeter3",
+    "radius3",
+    "concave_points1",
+    "perimeter1",
+    "area3",
+    "radius1",
+    "area1",
+    "concavity1",
+    "concavity3"
+  ],
+  "all_features": [
     "radius1",
     "texture1",
     "perimeter1",
@@ -35,5 +47,6 @@
     "B": "Tumor Benigno",
     "M": "Tumor Maligno"
   },
-  "target_column": "Diagnosis"
+  "target_column": "Diagnosis",
+  "default_approach_id": "selectkbest_10_features"
 }

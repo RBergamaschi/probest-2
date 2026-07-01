@@ -42,6 +42,7 @@ import {
   type ExampleCase,
   type FeatureExplanation,
   type FeatureStatsResponse,
+  type ModelApproach,
   type ModelInfo,
   type ModelSummary,
   type PredictResponse,
@@ -73,10 +74,18 @@ function Index() {
     queryFn: getModelInfo,
     retry: 1,
   });
+  const approaches = modelInfoQuery.data?.approaches ?? [];
+  const defaultApproachId = modelInfoQuery.data?.default_approach_id ?? approaches[0]?.id ?? "";
+  const [selectedApproachId, setSelectedApproachId] = useState("");
+  const effectiveApproachId = selectedApproachId || defaultApproachId;
+  const selectedApproach =
+    approaches.find((approach) => approach.id === effectiveApproachId) ?? approaches[0] ?? null;
+
   const examplesQuery = useQuery({
-    queryKey: ["examples"],
-    queryFn: getExamples,
+    queryKey: ["examples", effectiveApproachId],
+    queryFn: () => getExamples(effectiveApproachId),
     retry: 1,
+    enabled: Boolean(effectiveApproachId),
   });
   const summaryQuery = useQuery({
     queryKey: ["model-summary"],
@@ -90,9 +99,9 @@ function Index() {
   });
 
   const features = useMemo<string[]>(() => {
-    const modelFeatures = modelInfoQuery.data?.features;
+    const modelFeatures = selectedApproach?.features ?? modelInfoQuery.data?.features;
     return Array.isArray(modelFeatures) ? modelFeatures : [];
-  }, [modelInfoQuery.data]);
+  }, [modelInfoQuery.data, selectedApproach]);
 
   const examples = useMemo(() => examplesQuery.data?.examples ?? [], [examplesQuery.data]);
   const [selectedExampleId, setSelectedExampleId] = useState("");
@@ -110,6 +119,11 @@ function Index() {
       return next;
     });
   }, [features]);
+
+  useEffect(() => {
+    setSelectedExampleId("");
+    setResult(null);
+  }, [effectiveApproachId]);
 
   useEffect(() => {
     if (!selectedExampleId && examples.length) {
@@ -163,7 +177,7 @@ function Index() {
     setSubmitting(true);
     setResult(null);
     try {
-      const response = await postPredict(payload, threshold);
+      const response = await postPredict(payload, threshold, effectiveApproachId);
       setResult(response);
       toast.success("Predição gerada com sucesso.");
     } catch (error) {
@@ -223,12 +237,15 @@ function Index() {
               <PredictionPanel
                 examples={examples}
                 selectedExample={selectedExample}
+                approaches={approaches}
+                selectedApproach={selectedApproach}
                 features={features}
                 values={values}
                 mode={mode}
                 threshold={threshold}
                 submitting={submitting}
                 onModeChange={setMode}
+                onApproachChange={setSelectedApproachId}
                 onThresholdChange={setThreshold}
                 onExampleChange={(id) => {
                   const example = examples.find((item) => item.id === id);
@@ -253,6 +270,10 @@ function Index() {
 
             <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
               <ModelPerformanceCard summary={summaryQuery.data ?? null} />
+              <ApproachComparisonCard
+                summary={summaryQuery.data ?? null}
+                selectedApproachId={effectiveApproachId}
+              />
               <DatasetCard summary={summaryQuery.data ?? null} examples={examples} />
             </section>
           </div>
@@ -298,12 +319,15 @@ function Hero() {
 function PredictionPanel({
   examples,
   selectedExample,
+  approaches,
+  selectedApproach,
   features,
   values,
   mode,
   threshold,
   submitting,
   onModeChange,
+  onApproachChange,
   onThresholdChange,
   onExampleChange,
   onValueChange,
@@ -311,12 +335,15 @@ function PredictionPanel({
 }: {
   examples: ExampleCase[];
   selectedExample: ExampleCase | null;
+  approaches: ModelApproach[];
+  selectedApproach: ModelApproach | null;
   features: string[];
   values: Record<string, string>;
   mode: "simple" | "advanced";
   threshold: number;
   submitting: boolean;
   onModeChange: (mode: "simple" | "advanced") => void;
+  onApproachChange: (id: string) => void;
   onThresholdChange: (threshold: number) => void;
   onExampleChange: (id: string) => void;
   onValueChange: (name: string, value: string) => void;
@@ -357,7 +384,30 @@ function PredictionPanel({
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-[1fr_260px]">
+          <div className="grid gap-4 lg:grid-cols-[1fr_1fr_260px]">
+            <div className="space-y-2">
+              <Label htmlFor="approach">Abordagem Naive Bayes</Label>
+              <select
+                id="approach"
+                value={selectedApproach?.id ?? ""}
+                onChange={(event) => onApproachChange(event.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {approaches.map((approach) => (
+                  <option key={approach.id} value={approach.id}>
+                    {approach.name}
+                  </option>
+                ))}
+              </select>
+              {selectedApproach && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedApproach.features_count} features · F1 macro{" "}
+                  {formatPercent(selectedApproach.metrics.f1_macro)} · recall maligno{" "}
+                  {formatPercent(selectedApproach.metrics.recall_malignant)}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="example">Exemplo pronto</Label>
               <select
@@ -425,14 +475,12 @@ function PredictionPanel({
 
           {mode === "simple" && selectedExample && (
             <div className="grid gap-3 rounded-md border bg-muted/30 p-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              {["radius1", "texture1", "perimeter1", "area1", "concave_points3", "area3"].map(
-                (feature) => (
-                  <div key={feature}>
-                    <span className="text-muted-foreground">{feature}</span>
-                    <p className="font-medium">{formatNumber(selectedExample.features[feature])}</p>
-                  </div>
-                ),
-              )}
+              {features.slice(0, 6).map((feature) => (
+                <div key={feature}>
+                  <span className="text-muted-foreground">{feature}</span>
+                  <p className="font-medium">{formatNumber(selectedExample.features[feature])}</p>
+                </div>
+              ))}
             </div>
           )}
 
@@ -680,6 +728,75 @@ function ModelPerformanceCard({ summary }: { summary: ModelSummary | null }) {
           Baseline ingênuo de classe majoritária:{" "}
           <strong>{formatPercent(summary?.majority_baseline_accuracy)}</strong>. O modelo deve ser
           comparado contra esse valor para mostrar que aprendeu além de sempre prever benigno.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ApproachComparisonCard({
+  summary,
+  selectedApproachId,
+}: {
+  summary: ModelSummary | null;
+  selectedApproachId: string;
+}) {
+  const experiments = summary?.experiments ?? [];
+  const chartData = experiments.map((experiment) => ({
+    name: experiment.name.replace(" - ", "\n"),
+    id: experiment.id,
+    f1: Number(((experiment.f1_macro ?? 0) * 100).toFixed(2)),
+    recallMaligno: Number(((experiment.recall_malignant ?? 0) * 100).toFixed(2)),
+    confiancaErro: Number(((experiment.mean_error_confidence ?? 0) * 100).toFixed(2)),
+  }));
+  const selected = experiments.find((experiment) => experiment.id === selectedApproachId);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Comparação científica das abordagens</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} />
+              <YAxis tickFormatter={(value) => `${value}%`} />
+              <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
+              <Legend />
+              <Bar dataKey="f1" name="F1 macro" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="recallMaligno"
+                name="Recall maligno"
+                fill="#dc2626"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {selected && (
+          <div className="rounded-md border p-4 text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <strong>{selected.name}</strong>
+              {summary?.default_approach_id === selected.id && <Badge>Recomendada</Badge>}
+            </div>
+            <p className="mt-2 text-muted-foreground">{selected.description}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <Metric label="Features" value={String(selected.features_count)} />
+              <Metric label="Brier maligno" value={formatNumber(selected.brier_malignant)} />
+              <Metric
+                label="Conf. média nos erros"
+                value={formatPercent(selected.mean_error_confidence)}
+              />
+            </div>
+          </div>
+        )}
+
+        <p className="text-xs text-muted-foreground">
+          Todos os experimentos mantêm Gaussian Naive Bayes. A comparação muda apenas seleção de
+          features, redundância e calibração de probabilidades.
         </p>
       </CardContent>
     </Card>
