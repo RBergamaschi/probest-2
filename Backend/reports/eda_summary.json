@@ -1,0 +1,38 @@
+{
+  "dataset":"Breast Cancer Wisconsin Diagnostic Dataset",
+  "source":"uci",
+  "observacoes":569,
+  "features":30,
+  "valores_nulos":0,
+  "classes":{
+    "B":{
+      "classe":"Tumor Benigno",
+      "quantidade":357,
+      "percentual":62.74
+    },
+    "M":{
+      "classe":"Tumor Maligno",
+      "quantidade":212,
+      "percentual":37.26
+    }
+  },
+  "top10_diferenca_medias":[
+    "area3",
+    "area1",
+    "perimeter3",
+    "area2",
+    "perimeter1",
+    "radius3",
+    "texture3",
+    "radius1",
+    "texture1",
+    "perimeter2"
+  ],
+  "top5_correlacao_target":[
+    "concave_points3",
+    "perimeter3",
+    "concave_points1",
+    "radius3",
+    "perimeter1"
+  ]
+}
