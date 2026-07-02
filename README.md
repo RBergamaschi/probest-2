@@ -72,7 +72,9 @@ Exemplo de `POST /predict`:
 }
 ```
 
-O objeto `features` deve conter todas as 30 variaveis retornadas por `/model-info`.
+O objeto `features` deve conter as variaveis exigidas pela abordagem selecionada
+em `approach_id` (padrao: `selectkbest_10_features`, com 10 variaveis). A lista
+exata de variaveis por abordagem fica disponivel em `GET /model-info`.
 
 ## Frontend
 
@@ -81,7 +83,7 @@ O frontend usa Vite/React/TanStack Router diretamente, sem preset externo de sca
 Funcionalidades atuais:
 
 - modo simples com exemplos reais da base;
-- modo avancado com edicao das 30 features;
+- modo avancado com edicao das features da abordagem selecionada (10, 12 ou 30, conforme o modelo escolhido);
 - controle de limiar para classificar maligno;
 - grafico de probabilidades benigno/maligno;
 - alerta visual para predicoes de baixa confianca;
@@ -119,7 +121,7 @@ As metricas ficam em `Backend/reports/metrics.json`.
 
 ## Features E Pre-Processamento
 
-O modelo usa as 30 variaveis preditoras do WDBC, que representam medidas morfologicas do tumor. Essa escolha mantem toda a informacao disponibilizada pela base e evita descartar atributos relevantes sem necessidade.
+A base disponibiliza 30 variaveis preditoras do WDBC, que representam medidas morfologicas do tumor. O pipeline de treino testa 4 abordagens de selecao de features sobre essas 30 variaveis (ver secao "Resultado Do Modelo"); a abordagem recomendada e usada por padrao na API usa apenas 10 delas, escolhidas por score ANOVA.
 
 A analise exploratoria tambem gera rankings de apoio:
 

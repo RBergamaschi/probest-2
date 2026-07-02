@@ -5,15 +5,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
-from sklearn.datasets import load_breast_cancer
+from ucimlrepo import fetch_ucirepo
 
 # Força UTF-8 no terminal do Windows para caracteres especiais
 sys.stdout.reconfigure(encoding="utf-8")
 
 # ── Configurações globais de estilo ──────────────────────────────────────────
 # Define paleta consistente: benigno = azul, maligno = vermelho
-CORES_CLASSE = {0: "#4C72B0", 1: "#C44E52"}   # índice da classe → cor hex
-NOMES_CLASSE = {0: "Benigno", 1: "Maligno"}
+CORES_CLASSE = {1: "#4C72B0", 0: "#C44E52"}   # índice da classe → cor hex
+NOMES_CLASSE = {1: "Benigno", 0: "Maligno"}
 
 sns.set_theme(style="whitegrid", palette="muted", font_scale=1.1)
 plt.rcParams.update({"figure.dpi": 120, "savefig.bbox": "tight"})
@@ -41,24 +41,48 @@ def salvar_figura(nome_arquivo: str) -> None:
 # BLOCO 1: CARREGAMENTO E ESTRUTURA DOS DADOS
 # =============================================================================
 
+
+# Mapeia o sufixo numérico da UCI para o significado usado pelo trabalho:
+# sufixo 1 = média da medição, 2 = erro padrão, 3 = "pior" valor (maior) medido
+SUFIXO_PARA_PREFIXO = {"1": "mean", "2": "error", "3": "worst"}
+
+
+def _renomear_coluna_uci(coluna: str) -> str:
+    """Converte um nome de coluna da UCI (ex: 'concave_points3') para o
+    padrão legível usado no restante do script (ex: 'worst concave points').
+    """
+    base, sufixo = coluna[:-1], coluna[-1]         # separa nome da medida do sufixo (1/2/3)
+    base = base.replace("_", " ")                   # 'concave_points' -> 'concave points'
+    prefixo = SUFIXO_PARA_PREFIXO[sufixo]
+    return f"{base} error" if prefixo == "error" else f"{prefixo} {base}"
+
+
 def carregar_dados() -> pd.DataFrame:
-    #Carrega o Breast Cancer Wisconsin Dataset e retorna um DataFrame Pandas.
-    dataset = load_breast_cancer()
+    """Busca o Breast Cancer Wisconsin Diagnostic Dataset diretamente do
+    repositório da UCI Machine Learning (ID 17) e retorna um DataFrame Pandas.
 
-    # Monta DataFrame: cada linha é um tumor, cada coluna é uma característica
-    df = pd.DataFrame(data=dataset.data, columns=dataset.feature_names)
+    Fonte: https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic
+    """
+    uci_dataset = fetch_ucirepo(id=17)   # baixa (ou usa cache local) os dados da UCI
 
-    # Adiciona a variável-alvo como última coluna (0 = benigno, 1 = maligno)
-    df["target"] = dataset.target
+    # Renomeia as colunas da UCI (radius1, texture2, ...) para o padrão legível
+    df = uci_dataset.data.features.rename(columns=_renomear_coluna_uci)
 
-    return df, dataset
+    # Coluna 'Diagnosis' da UCI vem como texto: 'M' (maligno) ou 'B' (benigno)
+    # Convertida para numérico (0 = maligno, 1 = benigno), mesmo padrão do sklearn
+    diagnostico = uci_dataset.data.targets["Diagnosis"]
+    df["target"] = diagnostico.map({"M": 0, "B": 1})
+
+    return df
 
 
 print(SEPARADOR)
 print("BLOCO 1 — CARREGAMENTO E ESTRUTURA DOS DADOS")
 print(SEPARADOR)
+print("Fonte: UCI Machine Learning Repository — Breast Cancer Wisconsin (Diagnostic), ID 17")
+print("       https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic\n")
 
-df, dataset = carregar_dados()
+df = carregar_dados()
 
 print(f"Dimensões do DataFrame: {df.shape[0]} observações × {df.shape[1]} colunas\n")
 
@@ -135,8 +159,8 @@ def estatisticas_por_classe(df: pd.DataFrame) -> None:
     """
     features = [c for c in df.columns if c != "target"]
 
-    stats_benigno = df[df["target"] == 0][features].describe().T[["mean", "std"]]
-    stats_maligno = df[df["target"] == 1][features].describe().T[["mean", "std"]]
+    stats_benigno = df[df["target"] == 1][features].describe().T[["mean", "std"]]
+    stats_maligno = df[df["target"] == 0][features].describe().T[["mean", "std"]]
 
     # Renomeia colunas para deixar claro de qual classe vêm
     stats_benigno.columns = ["Média Benigno", "DP Benigno"]
@@ -227,8 +251,8 @@ def plotar_histogramas(df: pd.DataFrame) -> None:
 
     # Legenda única no canto superior direito da figura
     legend_patches = [
-        mpatches.Patch(color=CORES_CLASSE[0], label="Benigno"),
-        mpatches.Patch(color=CORES_CLASSE[1], label="Maligno"),
+        mpatches.Patch(color=CORES_CLASSE[1], label="Benigno"),
+        mpatches.Patch(color=CORES_CLASSE[0], label="Maligno"),
     ]
     fig.legend(handles=legend_patches, loc="upper right", fontsize=11)
 
@@ -258,8 +282,8 @@ def selecionar_top_features_por_diferenca(df: pd.DataFrame, n: int = 10) -> list
         Lista com os nomes das N features mais discriminativas pela média.
     """
     features = [c for c in df.columns if c != "target"]
-    media_benigno = df[df["target"] == 0][features].mean()
-    media_maligno = df[df["target"] == 1][features].mean()
+    media_benigno = df[df["target"] == 1][features].mean()
+    media_maligno = df[df["target"] == 0][features].mean()
 
     diferenca = (media_maligno - media_benigno).abs()
     return diferenca.nlargest(n).index.tolist()
@@ -287,8 +311,8 @@ def plotar_boxplots(df: pd.DataFrame, features: list[str]) -> None:
         ax = axes_flat[idx]
 
         dados_boxplot = [
-            df[df["target"] == 0][feature].values,   # valores para Benigno
-            df[df["target"] == 1][feature].values,   # valores para Maligno
+            df[df["target"] == 1][feature].values,   # valores para Benigno
+            df[df["target"] == 0][feature].values,   # valores para Maligno
         ]
 
         bp = ax.boxplot(
@@ -301,7 +325,7 @@ def plotar_boxplots(df: pd.DataFrame, features: list[str]) -> None:
         )
 
         # Aplica as cores das classes às caixas
-        for patch, classe in zip(bp["boxes"], [0, 1]):
+        for patch, classe in zip(bp["boxes"], [1, 0]):
             patch.set_facecolor(CORES_CLASSE[classe])
             patch.set_alpha(0.7)
 
@@ -477,8 +501,8 @@ print("RESUMO FINAL DA ANÁLISE EXPLORATÓRIA")
 print(SEPARADOR)
 
 n_total = len(df)
-n_benigno = (df["target"] == 0).sum()
-n_maligno = (df["target"] == 1).sum()
+n_benigno = (df["target"] == 1).sum()
+n_maligno = (df["target"] == 0).sum()
 pct_benigno = n_benigno / n_total * 100
 pct_maligno = n_maligno / n_total * 100
 

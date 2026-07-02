@@ -359,7 +359,7 @@ function PredictionPanel({
               Predição
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Use um exemplo real da base ou ajuste manualmente as 30 features no modo avançado.
+              Use um exemplo real da base ou ajuste manualmente as features no modo avançado.
             </p>
           </div>
           <div className="inline-flex rounded-md border bg-muted p-1">
